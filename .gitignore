@@ -1,5 +1,8 @@
 # Mac
 .DS_Store
+.DS_Store?
+._*
+
 # Logs
 logs
 *.log
@@ -19,3 +22,11 @@ node_modules
 # IDE
 .idea
 .vscode
+
+# Packages 
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
