@@ -1,30 +1,28 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin'); // HTML模板生成
-const glob = require("glob"); // 分离css
+const glob = require("glob"); // 文件路径
 const purifyCssWebpack = require("purifycss-webpack"); // 消除冗余的css
 const copyWebpackPlugin = require("copy-webpack-plugin"); // 静态资源输出
 const extractTextPlugin = require("extract-text-webpack-plugin"); // css文件分离
 
-module.exports = {
-  entry: { // 输入
-    app: './src/index.js'
-  },
+const dirVars = require('../config/dir.config.js');
+
+const options = {
+  cwd: dirVars.pagesDir, // 在pages目录里找
+  sync: true, // 这里不能异步，只能同步
+};
+var globInstance = new glob.Glob('!(_)*', options); // 考虑到多个页面共用HTML等资源的情况，跳过以'_'开头的目录
+const pageArr = globInstance.found; // ['index/index', 'index/login', 'alert/index']
+
+const entry = {}
+pageArr.forEach((page) => {
+  entry[page] = path.resolve(dirVars.pagesDir, page + '/page');
+});
+
+let configPlugins = {
+  entry,
   plugins: [
-    new HtmlWebpackPlugin({
-      template: './src/index.html',
-      filename: 'index.html',
-      favicon: './src/image/favicon.ico',
-      // title: title,
-      inject: true,
-      hash: true, //开启hash  ?[hash]
-      chunks: [ 'index'],
-      minify: process.env.NODE_ENV === "development" ? false : {
-        removeComments: true, //移除HTML中的注释
-        collapseWhitespace: true, //折叠空白区域 也就是压缩代码
-        removeAttributeQuotes: true, //去除属性引用
-      },
-    }),
 		new webpack.ProvidePlugin({ // 全局暴露统一入口
 			$: "jquery",
 			jQuery: "jquery",
@@ -36,7 +34,7 @@ module.exports = {
 			ignore: ['.*']
 		}]),
 		new purifyCssWebpack({ // 消除冗余的css代码
-			paths: glob.sync(path.join(__dirname, "../src/html/**/*.html"))
+			paths: glob.sync(path.join(__dirname, "../src/pages/**/*.html"))
 		}),
   ],
 	optimization: { 
@@ -54,19 +52,20 @@ module.exports = {
 			}
 		}
 	},
-  output: { // 输出
-    filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'dist')
-  },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src')
+      '@': path.resolve(__dirname, '../src'),
+      'VENDOR': path.resolve(__dirname, '../vendor'),
+      'CONFIG': path.resolve(__dirname, '../config'),
+      'LAYOUT': path.resolve(__dirname, '../src/layout/html'),
+      'DIST': path.resolve(__dirname, '../dist'),
     }
   },
   module: {
     rules: [
       {
         test: /\.(css|scss|sass|less)$/,
+        exclude: "/node_modules/",
         // 区别开发环境和生成环境
         use: process.env.NODE_ENV === "development" ? ["style-loader", "css-loader", "sass-loader", "less-loader", "postcss-loader"] : extractTextPlugin.extract({
           fallback: "style-loader",
@@ -104,7 +103,32 @@ module.exports = {
         test: /\.html$/,
         // html中的img标签
         use: ["html-withimg-loader"]
-      }
+      },
+      {
+        test: /\.ejs$/,
+        include: path.resolve(__dirname, '../src'),
+        loader: 'ejs-loader',
+      },
     ]
   }
 };
+// 多入口HTML模板生成
+pageArr.forEach((page) => {
+  const htmlPlugin = new HtmlWebpackPlugin({
+    filename: `${page}/page.html`,
+    template: path.resolve(dirVars.pagesDir, `./${page}/html.js`),
+    chunks: ['webpack-runtime', page, 'commons/commons'],
+    hash: true, // 为静态资源生成hash值
+    // xhtml: true,
+    // inject: true,
+    // hash: true, //开启hash  ?[hash]
+    // minify: process.env.NODE_ENV === "development" ? false : {
+    //   removeComments: true, //移除HTML中的注释
+    //   collapseWhitespace: true, //折叠空白区域 也就是压缩代码
+    //   removeAttributeQuotes: true, //去除属性引用
+    // },
+  });
+  configPlugins.plugins.push(htmlPlugin);
+});
+
+module.exports = configPlugins;

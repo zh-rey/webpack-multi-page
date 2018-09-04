@@ -23,7 +23,8 @@ module.exports = merge.smart(baseConfig, {
   },
   plugins: [
     new webpack.DefinePlugin({ // 指定开发环境
-      'process.env.NODE_ENV': JSON.stringify('development')
+      'process.env.NODE_ENV': JSON.stringify('development'),
+      'IS_PRODUCTION': false,
     }),
     new webpack.NamedModulesPlugin(), // 查看要修补(patch)的依赖
     new webpack.HotModuleReplacementPlugin() // HMR热替换

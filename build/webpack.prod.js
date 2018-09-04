@@ -8,19 +8,21 @@ const CleanWebpackPlugin = require('clean-webpack-plugin'); // 文件清理
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 var OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 
+const dirVars = require('../config/dir.config.js');
+
 module.exports = merge.smart(baseConfig, {
   mode: "production",
-  output: {
-		path: path.resolve(__dirname, '../dist'),
-		// 打包多出口文件
-		// 生成 a.bundle.[hash].js  b.bundle.[hash].js
-		filename: './js/[name].[hash:5].js',
-		publicPath: './'
-	},
+	output: { // 输出
+    path: dirVars.distDir,
+    publicPath: '/',
+    filename: '[name]/entry.[chunkhash].js',    // [name]表示entry每一项中的key，用以批量指定生成后文件的名称
+    chunkFilename: '[id].[chunkhash].bundle.js',
+  },
   devtool: 'source-map', // cheap-source-map
   plugins: [
     new webpack.DefinePlugin({ // 指定生产环境
-      'process.env.NODE_ENV': JSON.stringify('production')
+			'process.env.NODE_ENV': JSON.stringify('production'),
+			'IS_PRODUCTION': true,
     }),
     new CleanWebpackPlugin(['dist'], { // 删除dist目录
 			root: path.resolve(__dirname, '../'), //根目录
@@ -49,8 +51,5 @@ module.exports = merge.smart(baseConfig, {
 			}
     }),
     new BundleAnalyzerPlugin(),
-  ],
-  module: {
-    rules: []
-  }
+  ]
 });
