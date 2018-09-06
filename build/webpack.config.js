@@ -4,7 +4,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin'); // HTML模板生成
 const glob = require("glob"); // 文件路径
 const purifyCssWebpack = require("purifycss-webpack"); // 消除冗余的css
 const copyWebpackPlugin = require("copy-webpack-plugin"); // 静态资源输出
-const extractTextPlugin = require("extract-text-webpack-plugin"); // css文件分离
 
 const dirVars = require('../config/dir.config.js');
 
@@ -60,62 +59,12 @@ let configPlugins = {
       'LAYOUT': path.resolve(__dirname, '../src/layout/html'),
       'DIST': path.resolve(__dirname, '../dist'),
     }
-  },
-  module: {
-    rules: [
-      {
-        test: /\.(css|scss|sass|less)$/,
-        exclude: "/node_modules/",
-        // 区别开发环境和生成环境
-        use: process.env.NODE_ENV === "development" ? ["style-loader", "css-loader", "sass-loader", "less-loader", "postcss-loader"] : extractTextPlugin.extract({
-          fallback: "style-loader",
-          use: ["css-loader", "sass-loader", "less-loader", "postcss-loader"],
-          // css中的基础路径
-          publicPath: "../"
-    
-        })
-      },
-      {
-        test: /\.js$/,
-        use: ["babel-loader"],
-        // 不检查node_modules下的js文件
-        exclude: "/node_modules/"
-      }, {
-        test: /\.(png|jpg|gif)$/,
-        use: [{
-          // 需要下载file-loader和url-loader
-          loader: "url-loader",
-          options: {
-            limit: 5 * 1024, //小于这个时将会已base64位图片打包处理
-            // 图片文件输出的文件夹
-            outputPath: "images"
-          }
-        }]
-      },
-      {
-        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-        }
-      },
-      {
-        test: /\.html$/,
-        // html中的img标签
-        use: ["html-withimg-loader"]
-      },
-      {
-        test: /\.ejs$/,
-        include: path.resolve(__dirname, '../src'),
-        loader: 'ejs-loader',
-      },
-    ]
   }
 };
 // 多入口HTML模板生成
 pageArr.forEach((page) => {
   const htmlPlugin = new HtmlWebpackPlugin({
-    filename: `${page}/page.html`,
+    filename: `${page}/${page}.html`,
     template: path.resolve(dirVars.pagesDir, `./${page}/html.js`),
     chunks: ['webpack-runtime', page, 'commons/commons'],
     hash: true, // 为静态资源生成hash值
