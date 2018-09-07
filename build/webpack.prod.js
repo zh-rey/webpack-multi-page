@@ -30,16 +30,16 @@ module.exports = merge.smart(baseConfig, {
 						loader: 'css-loader',
 						options: {
 							minimize: true,
-							'-autoprefixer': true,
+							// '-autoprefixer': true,
 						},
 					},
 					{
-						loader: 'postcss-loader',
-						options: {           // 如果没有options这个选项将会报错 No PostCSS Config found
-							plugins: (loader) => [
-									require('autoprefixer')(), //CSS浏览器兼容
-							]
-						}
+            loader: 'postcss-loader',
+            options: {
+              config: {
+                  path: path.resolve(__dirname, '../config'),    // 写到目录即可，文件名强制要求是postcss.config.js
+              }
+            }
 					},
 					{
 						loader: 'sass-loader',
