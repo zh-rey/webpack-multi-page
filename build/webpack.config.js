@@ -91,7 +91,7 @@ let configPlugins = {
       },
       {
         test: /\.ejs$/,
-        include: path.resolve(__dirname, '../src'),
+        include: dirVars.srcDir,
         loader: 'ejs-loader',
       },
     ]
@@ -103,12 +103,12 @@ let configPlugins = {
 			'window.jQuery': 'jquery',
     }),
 		new copyWebpackPlugin([{ //静态资源输出
-			from: path.resolve(__dirname, "../src/assets"),
+			from: dirVars.assetsDir,
 			to: './assets',
 			ignore: ['.*']
 		}]),
 		new purifyCssWebpack({ // 消除冗余的css代码
-			paths: glob.sync(path.join(__dirname, "../src/pages/**/*.html"))
+			paths: glob.sync(path.join(dirVars.srcDir, "pages/**/*.html"))
 		}),
   ],
 	optimization: { 
@@ -128,11 +128,11 @@ let configPlugins = {
 	},
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, '../src'),
-      'VENDOR': path.resolve(__dirname, '../vendor'),
-      'CONFIG': path.resolve(__dirname, '../config'),
-      'LAYOUT': path.resolve(__dirname, '../src/layout/html'),
-      'DIST': path.resolve(__dirname, '../dist'),
+      '@': dirVars.srcDir,
+      'VENDOR': dirVars.vendorDir,
+      'CONFIG': dirVars.configDir,
+      'LAYOUT': dirVars.layoutDir+'/html.js',
+      'DIST': dirVars.distDir,
     }
   }
 };
