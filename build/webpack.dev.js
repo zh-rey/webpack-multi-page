@@ -7,9 +7,8 @@ module.exports = merge.smart(baseConfig, {
   mode: 'development',
   output: {
 		path: path.resolve(__dirname, '../dist'),
-		// 打包多出口文件
-		// 生成 a.bundle.[hash].js  b.bundle.[hash].js
-		filename: './js/[name].bundle.js'
+    filename: './js/[name].bundle.js',
+    hashDigestLength: 5,  // hash长度
 	},
   devtool: 'cheap-module-eval-source-map', // 开启调试模式
   devServer: {

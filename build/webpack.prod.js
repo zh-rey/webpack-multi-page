@@ -14,9 +14,10 @@ module.exports = merge.smart(baseConfig, {
   mode: "production",
 	output: { // 输出
     path: dirVars.distDir,
-    publicPath: '/',
-    filename: '[name]/entry.[chunkhash].js',    // [name]表示entry每一项中的key，用以批量指定生成后文件的名称
-    chunkFilename: '[id].[chunkhash].bundle.js',
+    publicPath: dirVars.distDir+'/',
+    filename: 'js/[name]/[name].js',
+    chunkFilename: 'js/[name].bundle.js',
+    hashDigestLength: 5,  // hash长度
   },
 	devtool: 'source-map', // cheap-source-map
 	module: {
@@ -33,14 +34,14 @@ module.exports = merge.smart(baseConfig, {
 							// '-autoprefixer': true,
 						},
 					},
-					{
-            loader: 'postcss-loader',
-            options: {
-              config: {
-                  path: path.resolve(__dirname, '../config'),    // 写到目录即可，文件名强制要求是postcss.config.js
-              }
-            }
-					},
+					// {
+          //   loader: 'postcss-loader',
+          //   options: {
+          //     config: {
+          //         path: path.resolve(__dirname, '../config'),    // 写到目录即可，文件名强制要求是postcss.config.js
+          //     }
+          //   }
+					// },
 					{
 						loader: 'sass-loader',
 					},
@@ -109,13 +110,13 @@ module.exports = merge.smart(baseConfig, {
 			}
     }),
 		new ExtractTextPlugin({ // 分离css插件参数为提取出去的路径
-			filename: 'css/[name].[hash:5].min.css',
+			filename: 'css/[name].min.css',
 		}),
-		new OptimizeCSSPlugin({ // 压缩css
-			cssProcessorOptions: {
-				safe: true
-			}
-    }),
+		// new OptimizeCSSPlugin({ // 压缩css
+		// 	cssProcessorOptions: {
+		// 		safe: true
+		// 	}
+    // }),
     new BundleAnalyzerPlugin(),
   ]
 });
