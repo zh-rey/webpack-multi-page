@@ -21,6 +21,81 @@ pageArr.forEach((page) => {
 
 let configPlugins = {
   entry,
+  output: { // 输出
+    path: dirVars.distDir,
+    publicPath: '../../',  // 输出解析文件的目录，url 相对于 HTML 页面
+    filename: 'js/[name]/[name].js',  // 「入口分块(entry chunk)」的文件名模板（出口分块？）
+    chunkFilename: 'js/[name].bundle.js',
+    hashDigestLength: 5,  // hash长度
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(css|scss|sass|less)$/,
+        exclude: "/node_modules/",
+        // 区别开发环境和生成环境
+        use: [
+					{
+						loader: 'css-loader',
+						options: {
+              minimize: true,
+              sourceMap: true
+						},
+					},
+					{
+						loader: 'sass-loader',
+					},
+					{
+						loader: 'less-loader',
+					}
+				]
+      },
+      {
+        test: /\.js$/,
+        use: [
+          {
+            loader: 'babel-loader',
+            // options: {
+            //   presets: [['es2015', { loose: true }]],
+            //   cacheDirectory: true,
+            //   plugins: ['transform-runtime'],
+            // },
+          }
+        ],
+        // 不检查node_modules下的js文件
+        exclude: "/node_modules/"
+      },
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: [{
+          // 需要下载file-loader和url-loader
+          loader: "url-loader",
+          options: {
+            limit: 3 * 1024, //小于这个时将会已base64位图片打包处理
+            // 图片文件输出的文件夹
+            outputPath: "images"
+          }
+        }]
+      },
+      {
+        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+        loader: 'url-loader',
+        options: {
+          limit: 10000,
+        }
+      },
+      {
+        test: /\.html$/,
+        // html中的img标签
+        use: ["html-withimg-loader"]
+      },
+      {
+        test: /\.ejs$/,
+        include: path.resolve(__dirname, '../src'),
+        loader: 'ejs-loader',
+      },
+    ]
+  },
   plugins: [
 		new webpack.ProvidePlugin({ // 全局暴露统一入口
 			$: "jquery",
@@ -64,7 +139,7 @@ let configPlugins = {
 // 多入口HTML模板生成
 pageArr.forEach((page) => {
   const htmlPlugin = new HtmlWebpackPlugin({
-    filename: `${page}/${page}.html`,
+    filename: `html/${page}/${page}.html`,
     template: path.resolve(dirVars.pagesDir, `./${page}/html.js`),
     chunks: ['webpack-runtime', page, 'commons/commons'],
     hash: true, // 为静态资源生成hash值
